@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build": "echo 'No build step required'",
+    "vercel-build": "echo 'Building for Vercel'"
     "bot": "node bot.js",
     "sync": "node force-sync.js",
     "dev": "nodemon server.js",
@@ -33,3 +35,4 @@
   "author": "St Studios",
   "license": "MIT"
 }
+
