@@ -470,15 +470,21 @@ app.use((err, req, res, next) => {
 
 /* ================= SERVER ================= */
 
-const HOST = process.env.HOST || 'cidade-alta-wl.vercel.app';
+/* ================= SERVER ================= */
 
-app.listen(HOST, () => {
-    console.log(`🚀 Servidor rodando em http://${HOST}`);
+const PORT = process.env.PORT || 3000;
+
+// Para Vercel, não especifique HOST
+app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
     console.log(`📊 Sistema Cidade Alta RP - St Studios`);
     console.log(`👤 Admin IDs: ${process.env.ADMIN_IDS || 'Não configurado'}`);
     console.log(`🤖 Bot Client ID: ${process.env.DISCORD_CLIENT_ID || 'Não configurado'}`);
     console.log(`📁 Pasta pública: ${path.join(__dirname, "public")}`);
 });
+
+// Export para Vercel
+module.exports = app;
 
 app.get("/api/roblox/whitelist", (req, res) => {
     if (req.headers.authorization !== process.env.ROBLOX_API_KEY) {
@@ -488,5 +494,6 @@ app.get("/api/roblox/whitelist", (req, res) => {
     const userId = req.query.userId;
     // consulta banco...
 });
+
 
 
