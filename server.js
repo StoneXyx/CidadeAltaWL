@@ -2,69 +2,110 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const axios = require("axios");
-//const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
 const app = express();
-//const db = new sqlite3.Database("./whitelist.db");
 
-/* ================= DB ================= */
+/* ================= BANCO EM MEMÓRIA ================= */
 
-db.serialize(() => {
-    // Criar tabela se não existir
-    db.run(`
-        CREATE TABLE IF NOT EXISTS formularios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            discord_id TEXT UNIQUE,
-            discord_name TEXT,
-            discord_avatar TEXT,
-            roblox TEXT,
-            idade TEXT,
-            experiencia TEXT,
-            status TEXT DEFAULT 'pendente',
-            motivo_reprova TEXT DEFAULT '',
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    `, (err) => {
-        if (err) {
-            console.error("❌ Erro ao criar tabela:", err.message);
-        } else {
-            console.log("✅ Tabela 'formularios' verificada/criada");
-        }
-    });
+const formularios = [];
+let formIdCounter = 1;
+
+// Funções para simular SQLite
+const db = {
+    // Buscar formulário por Discord ID
+    getFormByDiscordId: (discordId) => {
+        return formularios.find(f => f.discord_id === discordId);
+    },
     
-    // Criar trigger para updated_at
-    db.run(`
-        CREATE TRIGGER IF NOT EXISTS update_timestamp 
-        AFTER UPDATE ON formularios
-        BEGIN
-            UPDATE formularios 
-            SET updated_at = CURRENT_TIMESTAMP 
-            WHERE id = NEW.id;
-        END;
-    `, (err) => {
-        if (!err) {
-            console.log("✅ Trigger para updated_at criada");
+    // Buscar formulário por ID
+    getFormById: (id) => {
+        return formularios.find(f => f.id === parseInt(id));
+    },
+    
+    // Buscar todos os formulários (com filtro de status)
+    getAllForms: (status = null) => {
+        if (status && status !== 'all') {
+            return formularios.filter(f => f.status === status);
         }
-    });
-});
+        return formularios;
+    },
+    
+    // Inserir novo formulário
+    insertForm: (form) => {
+        const newForm = {
+            id: formIdCounter++,
+            ...form,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        formularios.push(newForm);
+        return newForm;
+    },
+    
+    // Atualizar formulário
+    updateForm: (discordId, updates) => {
+        const index = formularios.findIndex(f => f.discord_id === discordId);
+        if (index >= 0) {
+            formularios[index] = {
+                ...formularios[index],
+                ...updates,
+                updated_at: new Date().toISOString()
+            };
+            return formularios[index];
+        }
+        return null;
+    },
+    
+    // Atualizar por ID (admin)
+    updateFormById: (id, updates) => {
+        const index = formularios.findIndex(f => f.id === parseInt(id));
+        if (index >= 0) {
+            formularios[index] = {
+                ...formularios[index],
+                ...updates,
+                updated_at: new Date().toISOString()
+            };
+            return formularios[index];
+        }
+        return null;
+    },
+    
+    // Estatísticas
+    getStats: () => {
+        const stats = {
+            pendente: 0,
+            aprovado: 0,
+            reprovado: 0,
+            total: formularios.length
+        };
+        
+        formularios.forEach(form => {
+            if (stats[form.status] !== undefined) {
+                stats[form.status]++;
+            }
+        });
+        
+        return Object.entries(stats).map(([status, count]) => ({ status, count }));
+    }
+};
 
 /* ================= MIDDLEWARE ================= */
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(session({
     secret: process.env.SESSION_SECRET || "secret-session-cidade-alta",
     resave: false,
     saveUninitialized: false,
     cookie: { 
         maxAge: 86400000,
-        secure: false,
-        httpOnly: true
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'lax'
     }
 }));
-app.use(express.static(path.join(__dirname, "public")));
 
 /* ================= AUTH ================= */
 
@@ -76,7 +117,7 @@ function auth(req, res, next) {
 }
 
 function isAdmin(req, res, next) {
-    const ADMINS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',') : [];
+    const ADMINS = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => id.trim()) : [];
     if (!req.session.user || !ADMINS.includes(req.session.user.id)) {
         return res.status(403).json({ error: "Acesso negado. Apenas administradores." });
     }
@@ -106,21 +147,19 @@ app.get("/callback", async (req, res) => {
             }),
             { 
                 headers: { 
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Accept-Encoding": "application/json"
+                    "Content-Type": "application/x-www-form-urlencoded"
                 } 
             }
         );
 
         const userResponse = await axios.get("https://discord.com/api/users/@me", {
             headers: { 
-                Authorization: `Bearer ${tokenResponse.data.access_token}`,
-                "Accept-Encoding": "application/json"
+                Authorization: `Bearer ${tokenResponse.data.access_token}`
             }
         });
 
         const userData = userResponse.data;
-        const adminIds = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',') : [];
+        const adminIds = process.env.ADMIN_IDS ? process.env.ADMIN_IDS.split(',').map(id => id.trim()) : [];
         
         req.session.user = {
             id: userData.id,
@@ -130,46 +169,39 @@ app.get("/callback", async (req, res) => {
             isAdmin: adminIds.includes(userData.id)
         };
 
-        console.log(`✅ Login realizado: ${userData.username} (${userData.id})`);
+        console.log(`✅ Login: ${userData.username} (${userData.id})`);
         res.redirect("/dashboard");
 
     } catch (error) {
-        console.error("❌ Erro no login:", error.response?.data || error.message);
+        console.error("❌ Erro no login:", error.message);
         res.redirect("/?error=login_failed");
     }
 });
 
+/* ================= USER API ================= */
+
 app.get("/me", auth, (req, res) => {
-    db.get(
-        `SELECT * FROM formularios WHERE discord_id = ?`,
-        [req.session.user.id],
-        (err, form) => {
-            if (err) {
-                console.error("❌ Erro ao buscar formulário:", err);
-                return res.status(500).json({ error: "Erro no servidor" });
-            }
-            
-            const userData = {
-                ...req.session.user,
-                hasForm: !!form,
-                formStatus: form ? form.status : null,
-                robloxName: form ? form.roblox : null,
-                formId: form ? form.id : null
-            };
-            
-            res.json(userData);
-        }
-    );
+    const form = db.getFormByDiscordId(req.session.user.id);
+    
+    const userData = {
+        ...req.session.user,
+        hasForm: !!form,
+        formStatus: form ? form.status : null,
+        robloxName: form ? form.roblox : null,
+        formId: form ? form.id : null
+    };
+    
+    res.json(userData);
 });
 
-/* ================= FORM ================= */
+/* ================= FORM SUBMISSION ================= */
 
 app.post("/form", auth, (req, res) => {
     const { roblox, idade, experiencia } = req.body;
     const userId = req.session.user.id;
     const username = req.session.user.username;
 
-    console.log(`📝 Tentativa de formulário de: ${username} (${userId})`);
+    console.log(`📝 Formulário de: ${username} (${userId})`);
 
     // Validações
     if (!roblox || !idade || !experiencia) {
@@ -189,120 +221,83 @@ app.post("/form", auth, (req, res) => {
     }
 
     // Verificar se já tem formulário
-    db.get(
-        `SELECT id, status FROM formularios WHERE discord_id = ?`,
-        [userId],
-        (err, existingForm) => {
-            if (err) {
-                console.error("❌ Erro ao verificar formulário:", err);
-                return res.status(500).json({ error: "Erro no servidor" });
-            }
+    const existingForm = db.getFormByDiscordId(userId);
 
-            if (existingForm) {
-                if (existingForm.status === 'pendente') {
-                    return res.status(400).json({ 
-                        error: "Você já tem um formulário pendente de análise. Aguarde a resposta." 
-                    });
-                }
-                
-                if (existingForm.status === 'aprovado') {
-                    return res.status(400).json({ 
-                        error: "Seu formulário já foi APROVADO! Você não pode enviar outro." 
-                    });
-                }
-                
-                // Se foi reprovado, atualiza o existente
-                if (existingForm.status === 'reprovado') {
-                    db.run(
-                        `UPDATE formularios SET 
-                            roblox = ?, 
-                            idade = ?, 
-                            experiencia = ?, 
-                            status = 'pendente',
-                            motivo_reprova = '',
-                            updated_at = CURRENT_TIMESTAMP
-                         WHERE discord_id = ?`,
-                        [roblox, idade, experiencia, userId],
-                        function(err) {
-                            if (err) {
-                                console.error("❌ Erro ao atualizar formulário:", err);
-                                return res.status(500).json({ error: "Erro ao atualizar formulário" });
-                            }
-                            
-                            console.log(`✅ Formulário #${this.lastID} reenviado por ${username}`);
-                            res.json({ 
-                                ok: true, 
-                                message: "Formulário reenviado com sucesso! Aguarde a nova análise.",
-                                formId: existingForm.id 
-                            });
-                        }
-                    );
-                    return;
-                }
-            }
-
-            // Novo formulário
-            db.run(
-                `INSERT INTO formularios (discord_id, discord_name, discord_avatar, roblox, idade, experiencia)
-                 VALUES (?,?,?,?,?,?)`,
-                [userId, username, req.session.user.avatar, roblox, idade, experiencia],
-                function(err) {
-                    if (err) {
-                        if (err.message.includes('UNIQUE constraint failed')) {
-                            return res.status(400).json({ 
-                                error: "Você já tem um formulário cadastrado." 
-                            });
-                        }
-                        console.error("❌ Erro ao salvar formulário:", err);
-                        return res.status(500).json({ error: "Erro ao salvar formulário" });
-                    }
-                    
-                    console.log(`✅ Novo formulário #${this.lastID} de ${username}`);
-                    res.json({ 
-                        ok: true, 
-                        message: "Formulário enviado com sucesso! Aguarde a análise.",
-                        formId: this.lastID 
-                    });
-                }
-            );
-        }
-    );
-});
-
-/* ================= FORM DATA ================= */
-
-app.get("/form/data", auth, (req, res) => {
-    db.get(
-        `SELECT * FROM formularios WHERE discord_id = ?`,
-        [req.session.user.id],
-        (err, form) => {
-            if (err) {
-                console.error("❌ Erro ao buscar dados do formulário:", err);
-                return res.status(500).json({ error: "Erro no servidor" });
-            }
-            
-            if (!form) {
-                return res.json({ hasForm: false });
-            }
-            
-            res.json({
-                hasForm: true,
-                form: {
-                    id: form.id,
-                    roblox: form.roblox,
-                    idade: form.idade,
-                    experiencia: form.experiencia,
-                    status: form.status,
-                    motivo_reprova: form.motivo_reprova || '',
-                    created_at: form.created_at,
-                    updated_at: form.updated_at
-                }
+    if (existingForm) {
+        if (existingForm.status === 'pendente') {
+            return res.status(400).json({ 
+                error: "Você já tem um formulário pendente de análise. Aguarde a resposta." 
             });
         }
-    );
+        
+        if (existingForm.status === 'aprovado') {
+            return res.status(400).json({ 
+                error: "Seu formulário já foi APROVADO! Você não pode enviar outro." 
+            });
+        }
+        
+        // Se foi reprovado, atualiza o existente
+        if (existingForm.status === 'reprovado') {
+            const updated = db.updateForm(userId, {
+                roblox,
+                idade,
+                experiencia,
+                status: 'pendente',
+                motivo_reprova: ''
+            });
+            
+            console.log(`✅ Formulário #${updated.id} reenviado por ${username}`);
+            return res.json({ 
+                ok: true, 
+                message: "Formulário reenviado com sucesso! Aguarde a nova análise.",
+                formId: updated.id 
+            });
+        }
+    }
+
+    // Novo formulário
+    const newForm = db.insertForm({
+        discord_id: userId,
+        discord_name: username,
+        discord_avatar: req.session.user.avatar || null,
+        roblox,
+        idade,
+        experiencia,
+        status: 'pendente',
+        motivo_reprova: ''
+    });
+    
+    console.log(`✅ Novo formulário #${newForm.id} de ${username}`);
+    res.json({ 
+        ok: true, 
+        message: "Formulário enviado com sucesso! Aguarde a análise.",
+        formId: newForm.id 
+    });
 });
 
-/* ================= DASHBOARD ================= */
+app.get("/form/data", auth, (req, res) => {
+    const form = db.getFormByDiscordId(req.session.user.id);
+    
+    if (!form) {
+        return res.json({ hasForm: false });
+    }
+    
+    res.json({
+        hasForm: true,
+        form: {
+            id: form.id,
+            roblox: form.roblox,
+            idade: form.idade,
+            experiencia: form.experiencia,
+            status: form.status,
+            motivo_reprova: form.motivo_reprova || '',
+            created_at: form.created_at,
+            updated_at: form.updated_at
+        }
+    });
+});
+
+/* ================= PAGES ================= */
 
 app.get("/dashboard", auth, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "dashboard.html"));
@@ -312,30 +307,24 @@ app.get("/admin", isAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 /* ================= ADMIN API ================= */
 
 app.get("/admin/forms", isAdmin, (req, res) => {
     const status = req.query.status || 'pendente';
     const limit = parseInt(req.query.limit) || 50;
     
-    let query = `SELECT * FROM formularios`;
-    let params = [];
+    let forms = db.getAllForms(status === 'all' ? null : status);
     
-    if (status !== 'all') {
-        query += ` WHERE status = ?`;
-        params.push(status);
-    }
+    // Ordenar por data (mais recente primeiro) e limitar
+    forms = forms
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        .slice(0, limit);
     
-    query += ` ORDER BY created_at DESC LIMIT ?`;
-    params.push(limit);
-    
-    db.all(query, params, (err, rows) => {
-        if (err) {
-            console.error("❌ Erro ao buscar formulários:", err);
-            return res.status(500).json({ error: "Erro ao buscar formulários" });
-        }
-        res.json(rows);
-    });
+    res.json(forms);
 });
 
 app.post("/admin/action", isAdmin, (req, res) => {
@@ -349,77 +338,56 @@ app.post("/admin/action", isAdmin, (req, res) => {
         return res.status(400).json({ error: "Motivo da reprovação é obrigatório (mínimo 5 caracteres)" });
     }
 
-    db.run(
-        `UPDATE formularios SET status = ?, motivo_reprova = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-        [action, motivo || '', id],
-        function(err) {
-            if (err) {
-                console.error("❌ Erro ao atualizar status:", err);
-                return res.status(500).json({ error: "Erro ao atualizar status" });
-            }
-            
-            console.log(`✅ Formulário #${id} ${action} ${motivo ? 'com motivo' : ''}`);
-            res.json({ 
-                ok: true, 
-                message: `Formulário ${action} com sucesso`,
-                changes: this.changes 
-            });
-        }
-    );
+    const updatedForm = db.updateFormById(id, {
+        status: action,
+        motivo_reprova: action === 'reprovado' ? motivo : ''
+    });
+    
+    if (!updatedForm) {
+        return res.status(404).json({ error: "Formulário não encontrado" });
+    }
+    
+    console.log(`✅ Formulário #${id} ${action}`);
+    res.json({ 
+        ok: true, 
+        message: `Formulário ${action} com sucesso`,
+        form: updatedForm
+    });
 });
 
 app.get("/admin/stats", isAdmin, (req, res) => {
-    db.all(
-        `SELECT status, COUNT(*) as count FROM formularios GROUP BY status`,
-        (err, rows) => {
-            if (err) {
-                console.error("❌ Erro ao buscar estatísticas:", err);
-                return res.status(500).json({ error: "Erro ao buscar estatísticas" });
-            }
-            res.json(rows);
-        }
-    );
+    const stats = db.getStats();
+    res.json(stats);
 });
 
 app.get("/admin/form/:id", isAdmin, (req, res) => {
-    const id = req.params.id;
+    const form = db.getFormById(req.params.id);
     
-    db.get(
-        `SELECT * FROM formularios WHERE id = ?`,
-        [id],
-        (err, form) => {
-            if (err) {
-                console.error("❌ Erro ao buscar formulário:", err);
-                return res.status(500).json({ error: "Erro ao buscar formulário" });
-            }
-            
-            if (!form) {
-                return res.status(404).json({ error: "Formulário não encontrado" });
-            }
-            
-            res.json(form);
-        }
-    );
+    if (!form) {
+        return res.status(404).json({ error: "Formulário não encontrado" });
+    }
+    
+    res.json(form);
 });
 
 /* ================= SYSTEM STATUS ================= */
 
 app.get("/api/status", (req, res) => {
-    const botStatus = {
+    const stats = db.getStats();
+    const totalForms = formularios.length;
+    
+    res.json({
         online: true,
         uptime: process.uptime(),
-        memory: process.memoryUsage(),
         timestamp: new Date().toISOString(),
         version: "1.0.0",
-        system: "Cidade Alta RP - St Studios"
-    };
-    
-    // Contar formulários para estatísticas rápidas
-    db.get(`SELECT COUNT(*) as total FROM formularios`, (err, row) => {
-        if (!err && row) {
-            botStatus.totalForms = row.total;
+        system: "Cidade Alta RP - St Studios",
+        stats: {
+            total: totalForms,
+            pendente: stats.find(s => s.status === 'pendente')?.count || 0,
+            aprovado: stats.find(s => s.status === 'aprovado')?.count || 0,
+            reprovado: stats.find(s => s.status === 'reprovado')?.count || 0
         }
-        res.json(botStatus);
     });
 });
 
@@ -441,10 +409,36 @@ app.get("/health", (req, res) => {
     res.json({ 
         status: "online", 
         timestamp: new Date().toISOString(),
-        database: "connected"
+        forms: formularios.length,
+        memory: formularios.length > 0 ? "em_memoria" : "vazio"
     });
 });
 
+/* ================= ROBLOX API (para o bot) ================= */
+
+app.get("/api/roblox/whitelist", (req, res) => {
+    if (req.headers.authorization !== process.env.ROBLOX_API_KEY) {
+        return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const userId = req.query.userId;
+    const form = formularios.find(f => 
+        f.discord_id === userId || 
+        f.roblox?.toLowerCase() === userId?.toLowerCase()
+    );
+    
+    if (!form) {
+        return res.json({ whitelisted: false });
+    }
+    
+    res.json({
+        whitelisted: form.status === 'aprovado',
+        status: form.status,
+        roblox: form.roblox,
+        discord_id: form.discord_id,
+        discord_name: form.discord_name
+    });
+});
 
 /* ================= 404 HANDLER ================= */
 
@@ -461,40 +455,25 @@ app.use((req, res) => {
 /* ================= ERROR HANDLER ================= */
 
 app.use((err, req, res, next) => {
-    console.error("❌ Erro no servidor:", err.stack);
+    console.error("❌ Erro no servidor:", err.message);
     res.status(500).json({ 
         error: "Erro interno do servidor",
         message: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
 });
 
-/* ================= SERVER ================= */
+/* ================= EXPORT PARA VERCEL ================= */
 
-/* ================= SERVER ================= */
-
-const PORT = process.env.PORT || 3000;
-
-// Para Vercel, não especifique HOST
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${PORT}`);
-    console.log(`📊 Sistema Cidade Alta RP - St Studios`);
-    console.log(`👤 Admin IDs: ${process.env.ADMIN_IDS || 'Não configurado'}`);
-    console.log(`🤖 Bot Client ID: ${process.env.DISCORD_CLIENT_ID || 'Não configurado'}`);
-    console.log(`📁 Pasta pública: ${path.join(__dirname, "public")}`);
-});
-
-// Export para Vercel
 module.exports = app;
 
-app.get("/api/roblox/whitelist", (req, res) => {
-    if (req.headers.authorization !== process.env.ROBLOX_API_KEY) {
-        return res.status(403).json({ error: "Unauthorized" });
-    }
+/* ================= LOCAL DEVELOPMENT ================= */
 
-    const userId = req.query.userId;
-    // consulta banco...
-});
-
-
-
-
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
+        console.log(`📊 Sistema Cidade Alta RP - St Studios`);
+        console.log(`📁 Formulários em memória: ${formularios.length}`);
+        console.log(`👤 Admin IDs: ${process.env.ADMIN_IDS || 'Não configurado'}`);
+    });
+}
