@@ -86,14 +86,14 @@ function isAdmin(req, res, next) {
 /* ================= LOGIN DISCORD ================= */
 
 app.get("/login", (req, res) => {
-    const redirectUri = process.env.REDIRECT_URI || "http://localhost:3000/callback";
+    const redirectUri = process.env.REDIRECT_URI || "https://cidade-alta-wl.vercel.app/callback";
     const url = `https://discord.com/oauth2/authorize?client_id=${process.env.DISCORD_CLIENT_ID}&response_type=code&scope=identify&redirect_uri=${encodeURIComponent(redirectUri)}`;
     res.redirect(url);
 });
 
 app.get("/callback", async (req, res) => {
     try {
-        const redirectUri = process.env.REDIRECT_URI || "http://localhost:3000/callback";
+        const redirectUri = process.env.REDIRECT_URI || "https://cidade-alta-wl.vercel.app/callback";
         
         const tokenResponse = await axios.post(
             "https://discord.com/api/oauth2/token",
@@ -470,11 +470,10 @@ app.use((err, req, res, next) => {
 
 /* ================= SERVER ================= */
 
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || 'localhost';
+const HOST = process.env.HOST || 'cidade-alta-wl.vercel.app';
 
 app.listen(PORT, HOST, () => {
-    console.log(`🚀 Servidor rodando em http://${HOST}:${PORT}`);
+    console.log(`🚀 Servidor rodando em http://${HOST}`);
     console.log(`📊 Sistema Cidade Alta RP - St Studios`);
     console.log(`👤 Admin IDs: ${process.env.ADMIN_IDS || 'Não configurado'}`);
     console.log(`🤖 Bot Client ID: ${process.env.DISCORD_CLIENT_ID || 'Não configurado'}`);
@@ -489,3 +488,4 @@ app.get("/api/roblox/whitelist", (req, res) => {
     const userId = req.query.userId;
     // consulta banco...
 });
+
