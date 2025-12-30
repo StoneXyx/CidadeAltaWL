@@ -2,11 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const session = require("express-session");
 const axios = require("axios");
-const sqlite3 = require("sqlite3").verbose();
+//const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
 const app = express();
-const db = new sqlite3.Database("./whitelist.db");
+//const db = new sqlite3.Database("./whitelist.db");
 
 /* ================= DB ================= */
 
@@ -494,6 +494,7 @@ app.get("/api/roblox/whitelist", (req, res) => {
     const userId = req.query.userId;
     // consulta banco...
 });
+
 
 
 
