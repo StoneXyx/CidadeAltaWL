@@ -472,7 +472,7 @@ app.use((err, req, res, next) => {
 
 const HOST = process.env.HOST || 'cidade-alta-wl.vercel.app';
 
-app.listen(PORT, HOST, () => {
+app.listen(HOST, () => {
     console.log(`🚀 Servidor rodando em http://${HOST}`);
     console.log(`📊 Sistema Cidade Alta RP - St Studios`);
     console.log(`👤 Admin IDs: ${process.env.ADMIN_IDS || 'Não configurado'}`);
@@ -488,4 +488,5 @@ app.get("/api/roblox/whitelist", (req, res) => {
     const userId = req.query.userId;
     // consulta banco...
 });
+
 
