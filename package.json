@@ -12,6 +12,7 @@
     "express-session": "^1.17.3"
   },
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   }
 }
+
