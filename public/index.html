@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cidade Alta RP | St Studios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --black: #000000;
+            --black-light: #0a0a0a;
+            --black-lighter: #111111;
+            --gray-dark: #1a1a1a;
+            --gray: #2a2a2a;
+            --gray-light: #3a3a3a;
+            --white: #ffffff;
+            --white-dim: rgba(255, 255, 255, 0.87);
+            --white-dim-more: rgba(255, 255, 255, 0.6);
+            --accent: #ffffff;
+            --accent-glow: rgba(255, 255, 255, 0.1);
+            --accent-secondary: #a855f7;
+            
+            --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--black);
+            color: var(--white-dim);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-weight: 400;
+        }
+
+        /* Background Minimalista */
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        .glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.05;
+            z-index: -1;
+            animation: floatGlow 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(20px, 20px) scale(1.05); }
+        }
+
+        .glow-1 {
+            background: linear-gradient(135deg, var(--accent), transparent);
+            top: -300px;
+            right: -300px;
+        }
+
+        .glow-2 {
+            background: linear-gradient(135deg, var(--accent-secondary), transparent);
+            bottom: -300px;
+            left: -300px;
+            animation-delay: -4s;
+        }
+
+        /* Header Minimalista */
+        header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--gray-dark);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: border-color var(--transition);
+        }
+
+        header:hover {
+            border-bottom-color: var(--gray);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width var(--transition);
+        }
+
+        .logo:hover::before {
+            width: 100%;
+        }
+
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gray);
+            transition: all var(--transition);
+        }
+
+        .logo:hover .logo-image {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--white);
+            letter-spacing: -0.02em;
+        }
+
+        .logo-sub {
+            font-size: 0.75rem;
+            color: var(--white-dim-more);
+            font-weight: 300;
+            margin-left: 0.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .studio-text {
+            font-size: 0.7rem;
+            color: var(--white-dim-more);
+            opacity: 0.7;
+        }
+
+        /* Hero Minimalista */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+            position: relative;
+        }
+
+        .hero-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6rem;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 800;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--white);
+            position: relative;
+            display: inline-block;
+        }
+
+        .hero-content h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 80px;
+            height: 3px;
+            background: var(--accent);
+            animation: expandWidth 1.2s var(--transition) forwards;
+            transform-origin: left;
+        }
+
+        @keyframes expandWidth {
+            from { width: 0; }
+            to { width: 80px; }
+        }
+
+        .hero-content p {
+            font-size: 1.1rem;
+            color: var(--white-dim-more);
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            max-width: 550px;
+            animation: fadeInUp 0.8s 0.3s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-hero {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--black-lighter);
+            border: 1px solid var(--gray);
+            color: var(--white);
+            padding: 1.1rem 2.5rem;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s 0.7s both;
+        }
+
+        .btn-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .btn-hero:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .btn-hero:hover::before {
+            left: 100%;
+        }
+
+        .hero-image {
+            position: relative;
+            animation: subtleFloat 6s ease-in-out infinite;
+        }
+
+        @keyframes subtleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .hero-image::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-lg);
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .hero-image img {
+            width: 100%;
+            border-radius: var(--radius-md);
+            display: block;
+            position: relative;
+            z-index: 1;
+            transition: transform var(--transition);
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Features Minimalista - COM NOVOS ÍCONES */
+        .features {
+            padding: 8rem 2rem;
+            background: var(--black);
+            position: relative;
+        }
+
+        .features::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gray), transparent);
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            margin-bottom: 4rem;
+            color: var(--white);
+            position: relative;
+            display: inline-block;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--black-light);
+            border: 1px solid var(--gray-dark);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            transform: translateX(-100%);
+            transition: transform var(--transition);
+        }
+
+        .feature-card:hover {
+            border-color: var(--gray);
+            transform: translateY(-8px);
+        }
+
+        .feature-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            animation: fadeIn 0.5s both;
+            background: var(--black-lighter);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            border: 1px solid var(--gray-dark);
+            transition: all var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            background: var(--black);
+            border-color: var(--accent);
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Novos ícones personalizados */
+        .icon-shield {
+            color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .icon-police {
+            color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .icon-economy {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .icon-phone {
+            color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .icon-house {
+            color: #ec4899;
+            background: rgba(236, 72, 153, 0.1);
+        }
+
+        .icon-car {
+            color: #06b6d4;
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .icon-group {
+            color: #84cc16;
+            background: rgba(132, 204, 22, 0.1);
+        }
+
+        .icon-shield-alt {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: var(--white-dim-more);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Footer Minimalista */
+        footer {
+            background: var(--black);
+            border-top: 1px solid var(--gray-dark);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h4 {
+            font-family: 'Inter', sans-serif;
+            color: var(--white);
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .footer-section p {
+            color: var(--white-dim-more);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .footer-section a {
+            color: var(--white-dim-more);
+            text-decoration: none;
+            transition: color var(--transition);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a:hover {
+            color: var(--white);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1.5rem;
+        }
+
+        .social-links a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: var(--black-lighter);
+            border: 1px solid var(--gray-dark);
+            border-radius: 50%;
+            color: var(--white-dim);
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+
+        .social-links a:hover {
+            background: var(--black-light);
+            border-color: var(--gray);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 3rem;
+            margin-top: 3rem;
+            border-top: 1px solid var(--gray-dark);
+            color: var(--white-dim-more);
+            font-size: 0.85rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+                gap: 4rem;
+                text-align: center;
+            }
+
+            .hero-content h1::after {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .hero-image {
+                max-width: 600px;
+                margin: 0 auto;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .logo-image {
+                width: 40px;
+                height: 40px;
+            }
+
+            .logo-text {
+                font-size: 1.4rem;
+            }
+
+            .hero-container {
+                padding: 0 1rem;
+            }
+
+            .features {
+                padding: 6rem 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .feature-card {
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .logo-sub {
+                font-size: 0.65rem;
+            }
+
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.8rem;
+            }
+
+            .feature-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+            }
+        }
+
+        /* Scrollbar Minimalista */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--black-light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray);
+            border-radius: var(--radius-sm);
+            transition: background var(--transition);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-light);
+        }
+
+        /* Reduzir animações para preferências de movimento reduzido */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-grid"></div>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">
+             <img src="https://media.discordapp.net/attachments/747177233285775401/1455347505322790962/cdav2.png?ex=6954657c&is=695313fc&hm=44e4cf0190abce1c97efceb32a494da8e424a6a3bfa35b42b37c7aa3a206120c&=&format=webp&quality=lossless&width=930&height=930" 
+                     alt="Cidade Alta RP Logo" 
+                     class="logo-image">
+                <div>
+                    <div class="logo-text">CIDADE ALTA<span class="logo-sub">RP</span></div>
+                    <div class="studio-text">by St Studios</div>
+                </div>
+            </a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>BEM-VINDO AO <br>CIDADE ALTA</h1>
+                <p>Entre para o servidor de RP mais imersivo do Roblox. Whitelist exclusiva para garantir qualidade e imersão em cada interação.</p>
+                
+                <button class="btn-hero" onclick="loginDiscord()">
+                    <i class="fab fa-discord"></i>
+                    INICIAR WHITELIST
+                </button>
+            </div>
+            
+            <div class="hero-image">
+                <img src="https://media.discordapp.net/attachments/747177233285775401/1362974032798159019/cidade_alta_gfx_banner_sodagfx.png?ex=6953ddbc&is=69528c3c&hm=c5e14b825c7d426a8251b34f23a4625bfe5b7e171930dc839694a5183133c540&=&format=webp&quality=lossless&width=688&height=386" alt="Cidade Alta RP">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features - COM NOVOS ÍCONES -->
+    <section class="features">
+        <h2 class="section-title">POR QUE ESCOLHER CIDADE ALTA?</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon icon-shield">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <h3>Whitelist Exclusiva</h3>
+                <p>Sistema rigoroso de aprovação garantindo jogadores comprometidos com o roleplay de qualidade.</p>
+            </div>
+          
+
+            <div class="feature-card">
+                <div class="feature-icon icon-economy">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Economia Dinâmica</h3>
+                <p>Sistema econômico realista com empregos, negócios e vendas.</p>
+            </div>
+         
+            <div class="feature-card">
+                <div class="feature-icon icon-group">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Comunidade Ativa</h3>
+                <p>Staff dedicada e comunidade acolhedora para uma experiência social imersiva.</p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <div class="footer-section">
+                <h4>CIDADE ALTA RP</h4>
+                <p>Servidor de Roleplay desenvolvido pela St Studios. Focado em imersão e qualidade.</p>
+                <div class="social-links">
+                    <a href="https://discord.gg/77B2XJGs7W"><i class="fab fa-discord"></i></a>
+                    <a href="https://www.roblox.com/pt/games/98668029078692/Cidade-Alta-RP"><i class="fas fa-gamepad"></i></a>
+                    <a href="https://www.tiktok.com/@cidadealtarp_rbx"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h4>CONTATO</h4>
+                <a href="https://discord.gg/77B2XJGs7W">
+                    <p><i class="fas fa-headset"></i> Suporte no Discord</p>
+                </a>
+                <a href="https://www.roblox.com/pt/games/98668029078692/Cidade-Alta-RP">
+                    <p><i class="fas fa-gamepad"></i> Jogar no Roblox</p>
+                </a>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            © 2024 Cidade Alta RP | St Studios. Todos os direitos reservados.<br>
+            Este servidor não é afiliado à Roblox Corporation.
+        </div>
+    </footer>
+
+    <script>
+        function loginDiscord() {
+            window.location.href = "/login";
+        }
+
+        const title = document.querySelector('.hero-content h1');
+        const originalText = title.textContent;
+        title.textContent = '';
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < originalText.length) {
+                title.textContent += originalText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 50);
+            }
+        }
+
+        setTimeout(typeWriter, 1000);
+        document.addEventListener('DOMContentLoaded', () => {
+            const featureCards = document.querySelectorAll('.feature-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.1
+            });
+
+            featureCards.forEach(card => {
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

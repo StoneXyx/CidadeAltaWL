@@ -1,0 +1,537 @@
+/* public/style.css - Estilos globais minimalistas */
+
+:root {
+  --black: #000000;
+  --black-light: #0a0a0a;
+  --black-lighter: #111111;
+  --gray-dark: #1a1a1a;
+  --gray: #2a2a2a;
+  --gray-light: #3a3a3a;
+  --white: #ffffff;
+  --white-dim: rgba(255, 255, 255, 0.87);
+  --white-dim-more: rgba(255, 255, 255, 0.6);
+  --accent: #ffffff;
+  --accent-glow: rgba(255, 255, 255, 0.3);
+  
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+/* Reset e Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--black);
+  color: var(--white-dim);
+  min-height: 100vh;
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Tipografia Minimalista */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: var(--white);
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+h1::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: expandWidth 1s var(--transition-medium) forwards;
+}
+
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  margin-bottom: 1.25rem;
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  margin-bottom: 1rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--white-dim-more);
+}
+
+a {
+  color: var(--white);
+  text-decoration: none;
+  position: relative;
+  transition: color var(--transition-fast);
+  font-weight: 500;
+}
+
+a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--accent);
+  transition: width var(--transition-medium);
+}
+
+a:hover {
+  color: var(--white);
+}
+
+a:hover::after {
+  width: 100%;
+}
+
+/* Scrollbar Elegante */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--black-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-light);
+}
+
+/* Botões Minimalistas */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.875rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--transition-medium);
+  border: none;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  color: var(--white);
+  border: 1px solid var(--gray);
+  letter-spacing: 0.02em;
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.7s ease;
+}
+
+.btn:hover::before {
+  left: 100%;
+}
+
+.btn-primary {
+  background: var(--black-lighter);
+  border-color: var(--white);
+  color: var(--white);
+}
+
+.btn-primary:hover {
+  background: var(--gray-dark);
+  border-color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--gray-light);
+  color: var(--white-dim);
+}
+
+.btn-secondary:hover {
+  border-color: var(--white);
+  color: var(--white);
+  transform: translateY(-1px);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn:disabled:hover::before {
+  left: -100%;
+}
+
+/* Cards Minimalistas */
+.card {
+  background: var(--black-light);
+  border: 1px solid var(--gray-dark);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  transition: all var(--transition-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform: translateX(-100%);
+  transition: transform var(--transition-slow);
+}
+
+.card:hover {
+  border-color: var(--gray);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-medium);
+}
+
+.card:hover::before {
+  transform: translateX(100%);
+}
+
+/* Formulários Elegantes */
+.form-group {
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+  color: var(--white-dim);
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.form-control {
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: var(--black-lighter);
+  border: 1px solid var(--gray-dark);
+  border-radius: var(--radius-md);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all var(--transition-medium);
+  letter-spacing: 0.01em;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--white);
+  background: var(--black-light);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.form-control::placeholder {
+  color: var(--white-dim-more);
+}
+
+/* Alertas Sutis */
+.alert {
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  animation: slideInUp 0.4s var(--transition-medium) forwards;
+  opacity: 0;
+  transform: translateY(10px);
+  border-left: 3px solid;
+  background: var(--black-light);
+}
+
+.alert-success {
+  border-left-color: #10b981;
+  color: #10b981;
+}
+
+.alert-warning {
+  border-left-color: #f59e0b;
+  color: #f59e0b;
+}
+
+.alert-danger {
+  border-left-color: #ef4444;
+  color: #ef4444;
+}
+
+.alert-info {
+  border-left-color: #3b82f6;
+  color: #3b82f6;
+}
+
+/* Badges Discretos */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 50px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  background: var(--black-lighter);
+  border: 1px solid var(--gray);
+  color: var(--white-dim);
+  transition: all var(--transition-fast);
+}
+
+.badge:hover {
+  border-color: var(--white-dim);
+  color: var(--white);
+}
+
+/* Loading Spinner Minimalista */
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--gray-dark);
+  border-top-color: var(--white);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.spinner-lg {
+  width: 48px;
+  height: 48px;
+  border-width: 3px;
+}
+
+/* Animações Sofisticadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+  }
+  to {
+    width: 60px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Classes de utilidade */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mt-4 { margin-top: 2rem; }
+.mt-5 { margin-top: 3rem; }
+
+.mb-1 { margin-bottom: 0.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+.mb-3 { margin-bottom: 1.5rem; }
+.mb-4 { margin-bottom: 2rem; }
+.mb-5 { margin-bottom: 3rem; }
+
+.p-1 { padding: 0.5rem; }
+.p-2 { padding: 1rem; }
+.p-3 { padding: 1.5rem; }
+.p-4 { padding: 2rem; }
+
+.d-flex { display: flex; }
+.flex-column { flex-direction: column; }
+.align-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.justify-center { justify-content: center; }
+.justify-end { justify-content: flex-end; }
+
+.w-100 { width: 100%; }
+.h-100 { height: 100%; }
+
+.gap-1 { gap: 0.5rem; }
+.gap-2 { gap: 1rem; }
+.gap-3 { gap: 1.5rem; }
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Efeitos de entrada */
+.fade-in {
+  animation: fadeIn 0.6s var(--transition-medium) forwards;
+  opacity: 0;
+}
+
+.float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Skeleton Loading */
+.skeleton {
+  background: linear-gradient(90deg, var(--black-lighter) 25%, var(--gray-dark) 50%, var(--black-lighter) 75%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: var(--radius-md);
+}
+
+/* Divisores */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gray), transparent);
+  margin: 2rem 0;
+  border: none;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.25rem;
+  }
+  
+  .card {
+    padding: 1.75rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9rem;
+  }
+  
+  h1::after {
+    width: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .card {
+    padding: 1.5rem;
+  }
+  
+  .alert {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+/* Modo de alta performance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

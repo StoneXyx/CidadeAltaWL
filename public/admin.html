@@ -1,0 +1,25 @@
+<script>
+fetch("/me").then(r=>r.json()).then(u=>{
+if(!u || !u.isAdmin) location.href="/";
+});
+</script>
+
+<div id="list"></div>
+
+<script>
+fetch("/admin/forms").then(r=>r.json()).then(f=>{
+f.forEach(x=>{
+list.innerHTML+=`
+<div>
+<b>${x.roblox}</b>
+<button onclick="acao(${x.id},'aprovado')">Aprovar</button>
+<button onclick="acao(${x.id},'reprovado')">Reprovar</button>
+</div>`;
+});
+});
+
+function acao(id,a){
+fetch("/admin/action",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,action:a})})
+.then(()=>location.reload());
+}
+</script>

@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Cidade Alta RP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --black: #000000;
+            --black-light: #0a0a0a;
+            --black-lighter: #111111;
+            --gray-dark: #1a1a1a;
+            --gray: #2a2a2a;
+            --gray-light: #3a3a3a;
+            --white: #ffffff;
+            --white-dim: rgba(255, 255, 255, 0.87);
+            --white-dim-more: rgba(255, 255, 255, 0.6);
+            --accent: #ffffff;
+            --accent-glow: rgba(255, 255, 255, 0.1);
+            
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            --transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-sm: 4px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--black);
+            color: var(--white-dim);
+            min-height: 100vh;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* Background Dashboard */
+        .bg-dashboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at top right, rgba(255, 255, 255, 0.03), transparent 50%),
+                radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.03), transparent 50%),
+                linear-gradient(180deg, var(--black) 0%, var(--black-light) 100%);
+            z-index: -1;
+        }
+
+        /* Header Minimalista */
+        .dashboard-header {
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--gray-dark);
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: border-color var(--transition);
+        }
+
+        .dashboard-header:hover {
+            border-bottom-color: var(--gray);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            transition: width var(--transition);
+        }
+
+        .logo:hover::before {
+            width: 100%;
+        }
+
+        .logo-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--gray);
+            transition: all var(--transition);
+        }
+
+        .logo:hover .logo-image {
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .logo-text {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--white);
+        }
+
+        .logo-sub {
+            font-size: 0.8rem;
+            color: var(--white-dim-more);
+            margin-top: 0.2rem;
+            display: block;
+            font-weight: 300;
+        }
+
+        /* User Info */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--black-lighter);
+            padding: 0.75rem 1.2rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-dark);
+            transition: all var(--transition);
+        }
+
+        .user-info:hover {
+            border-color: var(--gray);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--gray);
+            object-fit: cover;
+            transition: border-color var(--transition);
+        }
+
+        .user-info:hover .user-avatar {
+            border-color: var(--accent);
+        }
+
+        .user-details h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .user-details p {
+            font-size: 0.8rem;
+            color: var(--white-dim-more);
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--gray);
+            color: var(--white-dim);
+            padding: 0.7rem 1.2rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        /* Main Content */
+        .dashboard-container {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        /* Status Card */
+        .status-card {
+            background: var(--black-light);
+            border: 1px solid var(--gray-dark);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            animation: slideUp 0.6s var(--transition);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--gray-dark);
+        }
+
+        .status-header h2 {
+            font-size: 1.4rem;
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            background: var(--black-lighter);
+            border: 1px solid;
+            transition: all var(--transition);
+        }
+
+        /* Status Badge Colors */
+        .status-badge.status-pending {
+            border-color: var(--warning);
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .status-badge.status-approved {
+            border-color: var(--success);
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .status-badge.status-rejected {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .status-badge.status-none {
+            border-color: var(--gray);
+            color: var(--white-dim);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .status-item {
+            padding: 1.5rem;
+            background: var(--black-lighter);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--gray-dark);
+            transition: all var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-item:hover {
+            border-color: var(--gray);
+            transform: translateY(-2px);
+        }
+
+        .status-label {
+            font-size: 0.85rem;
+            color: var(--white-dim-more);
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--white);
+            word-break: break-word;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Status Icons */
+        .status-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            transition: all var(--transition);
+        }
+
+        .status-icon.user {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .status-icon.age {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        .status-icon.date {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .status-icon.update {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        /* Rejection Reason */
+        .rejection-reason {
+            background: rgba(239, 68, 68, 0.05);
+            border-left: 3px solid var(--danger);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            border-radius: 0 var(--radius-md) var(--radius-md) 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .rejection-reason h4 {
+            color: var(--danger);
+            margin-bottom: 0.8rem;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .rejection-reason p {
+            color: var(--white-dim);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Form Container */
+        .form-container {
+            background: var(--black-light);
+            border: 1px solid var(--gray-dark);
+            border-radius: var(--radius-lg);
+            padding: 3rem;
+            animation: slideUp 0.8s var(--transition);
+        }
+
+        .form-title {
+            font-size: 1.6rem;
+            margin-bottom: 2.5rem;
+            color: var(--white);
+            font-weight: 600;
+            text-align: center;
+            position: relative;
+            padding-bottom: 1rem;
+        }
+
+        .form-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 500;
+            color: var(--white);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem;
+            background: var(--black-lighter);
+            border: 1px solid var(--gray-dark);
+            border-radius: var(--radius-md);
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--black-light);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        .form-control::placeholder {
+            color: var(--white-dim-more);
+        }
+
+        .form-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--black);
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.85rem;
+            color: var(--white-dim-more);
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--black-lighter);
+            border: 1px solid var(--gray);
+            border-radius: var(--radius-md);
+            color: var(--white);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .btn-submit:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Loading Overlay */
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--gray-dark);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--white-dim);
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Alert Container */
+        #alertContainer {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+
+        .alert {
+            padding: 1.2rem 1.5rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            animation: slideInRight 0.4s var(--transition);
+            backdrop-filter: blur(10px);
+            border: 1px solid;
+            background: var(--black-light);
+            max-width: 400px;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-success {
+            border-color: var(--success);
+            color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .alert-warning {
+            border-color: var(--warning);
+            color: var(--warning);
+            background: rgba(245, 158, 11, 0.1);
+        }
+
+        .alert-danger {
+            border-color: var(--danger);
+            color: var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .alert-info {
+            border-color: var(--info);
+            color: var(--info);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        /* Instructions */
+        .instructions {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--white-dim-more);
+            font-size: 0.9rem;
+        }
+
+        /* Form Icons */
+        .form-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .form-icon.user {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        .form-icon.age {
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+        }
+
+        .form-icon.experience {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        /* Instructions Icons */
+        .instructions-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+
+        .instructions-icon.clock {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .instructions-icon.bell {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .instructions-icon.help {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+                padding: 1rem;
+            }
+
+            .user-info {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .dashboard-container {
+                padding: 0 1rem;
+                margin: 1rem auto;
+            }
+
+            .status-content {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 2rem;
+            }
+
+            .form-title {
+                font-size: 1.5rem;
+            }
+
+            #alertContainer {
+                top: 80px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+
+            .alert {
+                max-width: none;
+            }
+
+            .btn-logout span {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .status-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .user-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .logo-text {
+                font-size: 1.3rem;
+            }
+
+            .logo-image {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--black-light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray);
+            border-radius: var(--radius-sm);
+            transition: background var(--transition);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-light);
+        }
+
+        /* Reduzir animações */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-dashboard"></div>
+
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">Carregando...</div>
+    </div>
+
+    <div id="alertContainer"></div>
+
+    <!-- Header -->
+    <header class="dashboard-header">
+        <a href="/" class="logo">
+            <img src="https://media.discordapp.net/attachments/747177233285775401/1455347505322790962/cdav2.png?ex=6954657c&is=695313fc&hm=44e4cf0190abce1c97efceb32a494da8e424a6a3bfa35b42b37c7aa3a206120c&=&format=webp&quality=lossless&width=930&height=930" 
+                 alt="Cidade Alta RP Logo" 
+                 class="logo-image">
+            <div>
+                <div class="logo-text">CIDADE ALTA RP</div>
+                <div class="logo-sub">Sistema de Whitelist</div>
+            </div>
+        </a>
+
+        <div class="user-info">
+            <img id="userAvatar" class="user-avatar" 
+                 src="https://cdn.discordapp.com/embed/avatars/0.png" 
+                 onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+            <div class="user-details">
+                <h3 id="username">Carregando...</h3>
+                <p id="userId">ID: ---</p>
+            </div>
+            <button class="btn-logout" onclick="logout()" title="Sair da conta">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>SAIR</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="dashboard-container">
+        <!-- Status Section -->
+        <div class="status-card">
+            <div class="status-header">
+                <h2>Status da sua Whitelist</h2>
+                <div id="statusBadge" class="status-badge status-none">
+                    <i class="fas fa-circle"></i>
+                    <span>CARREGANDO...</span>
+                </div>
+            </div>
+            
+            <div class="status-content">
+                <div class="status-item">
+                    <div class="status-icon user">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="status-label">
+                        <i class="fas fa-user"></i>
+                        <span>Nick Roblox</span>
+                    </div>
+                    <div class="status-value" id="robloxName">---</div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon age">
+                        <i class="fas fa-birthday-cake"></i>
+                    </div>
+                    <div class="status-label">
+                        <i class="fas fa-birthday-cake"></i>
+                        <span>Idade</span>
+                    </div>
+                    <div class="status-value" id="userAge">---</div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon date">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div class="status-label">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span>Data de Envio</span>
+                    </div>
+                    <div class="status-value" id="submitDate">---</div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-icon update">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="status-label">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>Última Atualização</span>
+                    </div>
+                    <div class="status-value" id="updateDate">---</div>
+                </div>
+            </div>
+
+            <!-- Motivo da Reprovação -->
+            <div id="rejectionReason" class="rejection-reason" style="display: none;">
+                <h4><i class="fas fa-exclamation-circle"></i> Motivo da Reprovação</h4>
+                <p id="rejectionText"></p>
+            </div>
+        </div>
+
+        <!-- Form Section -->
+        <div class="form-container">
+            <h2 class="form-title">Formulário de Whitelist</h2>
+            
+            <form id="whitelistForm" onsubmit="event.preventDefault(); submitForm();">
+                <div class="form-group">
+                    <div class="form-label">
+                        <div class="form-icon user">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>Nick do Roblox *</span>
+                    </div>
+                    <input type="text" id="roblox" class="form-control" 
+                           placeholder="Digite exatamente como aparece no Roblox" 
+                           required
+                           minlength="3"
+                           maxlength="25">
+                    <small style="color: var(--white-dim-more); font-size: 0.85rem; display: block; margin-top: 0.5rem;">
+                        Este nick será usado para identificação no servidor
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">
+                        <div class="form-icon age">
+                            <i class="fas fa-birthday-cake"></i>
+                        </div>
+                        <span>Idade *</span>
+                    </div>
+                    <input type="number" id="idade" class="form-control" 
+                           min="13" max="99" placeholder="Digite sua idade" required>
+                    <small style="color: var(--white-dim-more); font-size: 0.85rem; display: block; margin-top: 0.5rem;">
+                        Você precisa ter pelo menos 13 anos para se candidatar
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <div class="form-label">
+                        <div class="form-icon experience">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <span>Experiência em Roleplay *</span>
+                    </div>
+                    <textarea id="experiencia" class="form-control" 
+                              rows="8" 
+                              placeholder="Conte-nos sobre sua experiência em servidores de RP. Seja detalhado e específico.
+
+Exemplo:
+• Em quais servidores você já jogou?
+• Quanto tempo de experiência tem com RP?
+• Já participou de facções ou departamentos?
+• Quais tipos de personagens costuma interpretar?
+• Conhece as regras básicas de RP (metagaming, powergaming, etc.)? Explique-às!
+• Qual é a história e a personalidade do seu personagem?
+• Como o seu personagem reagiria a uma situação de perigo (ex. assalto, acidente)?"
+                              required
+                              minlength="300"
+                              maxlength="5000"></textarea>
+                    <div class="char-count">
+                        <small style="color: var(--white-dim-more);">
+                            <i class="fas fa-info-circle"></i> Mínimo 300 caracteres
+                        </small>
+                        <span id="charCount">0</span> / 5000 caracteres
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    <span id="submitText">ENVIAR FORMULÁRIO</span>
+                </button>
+
+                <div class="instructions">
+                    <p>
+                        <span class="instructions-icon clock">
+                            <i class="fas fa-clock"></i>
+                        </span>
+                        Análise realizada em até 48 horas
+                    </p>
+                    <p>
+                        <span class="instructions-icon bell">
+                            <i class="fas fa-bell"></i>
+                        </span>
+                        Você receberá uma mensagem no Discord com o resultado
+                    </p>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="instructions">
+            <p>
+                <span class="instructions-icon help">
+                    <i class="fas fa-question-circle"></i>
+                </span>
+                Dúvidas? Entre em contato com a staff no Discord
+            </p>
+            <p>© 2024 Cidade Alta RP • St Studios</p>
+        </div>
+    </div>
+
+    <script>
+        let userData = null;
+        let formData = null;
+        let isLoading = false;
+
+        const elements = {
+            loadingOverlay: document.getElementById('loadingOverlay'),
+            loadingText: document.getElementById('loadingText'),
+            alertContainer: document.getElementById('alertContainer'),
+            username: document.getElementById('username'),
+            userId: document.getElementById('userId'),
+            userAvatar: document.getElementById('userAvatar'),
+            statusBadge: document.getElementById('statusBadge'),
+            robloxName: document.getElementById('robloxName'),
+            userAge: document.getElementById('userAge'),
+            submitDate: document.getElementById('submitDate'),
+            updateDate: document.getElementById('updateDate'),
+            rejectionReason: document.getElementById('rejectionReason'),
+            rejectionText: document.getElementById('rejectionText'),
+            submitBtn: document.getElementById('submitBtn'),
+            submitText: document.getElementById('submitText'),
+            robloxInput: document.getElementById('roblox'),
+            idadeInput: document.getElementById('idade'),
+            experienciaInput: document.getElementById('experiencia'),
+            charCount: document.getElementById('charCount')
+        };
+
+        function showLoading(message = 'Carregando...') {
+            isLoading = true;
+            elements.loadingText.textContent = message;
+            elements.loadingOverlay.style.display = 'flex';
+        }
+
+        function hideLoading() {
+            isLoading = false;
+            elements.loadingOverlay.style.display = 'none';
+        }
+
+        function showAlert(message, type = 'info', duration = 8000) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                   type === 'warning' ? 'exclamation-triangle' : 
+                                   type === 'danger' ? 'times-circle' : 'info-circle'}"></i>
+                <div>${message}</div>
+            `;
+            
+            elements.alertContainer.appendChild(alert);
+            
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.style.opacity = '0';
+                    alert.style.transition = 'opacity 0.5s';
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.remove();
+                        }
+                    }, 500);
+                }
+            }, duration);
+            
+            return alert;
+        }
+
+        function updateCharCount() {
+            const count = elements.experienciaInput.value.length;
+            elements.charCount.textContent = count;
+            
+            if (count < 100) {
+                elements.charCount.style.color = 'var(--danger)';
+            } else if (count < 500) {
+                elements.charCount.style.color = 'var(--warning)';
+            } else {
+                elements.charCount.style.color = 'var(--success)';
+            }
+        }
+
+        async function loadUserData() {
+            if (isLoading) return;
+            
+            showLoading('Carregando suas informações...');
+            
+            try {
+                const response = await fetch("/me");
+                
+                if (response.status === 401 || response.status === 403) {
+                    showAlert('Sessão expirada. Redirecionando para login...', 'warning');
+                    setTimeout(() => window.location.href = "/", 2000);
+                    return;
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (!data) {
+                    throw new Error('Dados do usuário não retornados');
+                }
+
+                userData = data;
+                
+                elements.username.textContent = data.username || 'Usuário';
+                elements.userId.textContent = `ID: ${data.id || '---'}`;
+                
+                if (data.avatar) {
+                    elements.userAvatar.src = 
+                        `https://cdn.discordapp.com/avatars/${data.id}/${data.avatar}.png?size=256`;
+                } else if (data.discriminator) {
+                    const avatarNum = parseInt(data.discriminator) % 5;
+                    elements.userAvatar.src = 
+                        `https://cdn.discordapp.com/embed/avatars/${avatarNum}.png`;
+                }
+                await loadFormData();
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados do usuário:', error);
+                showAlert('Erro ao carregar informações. Tente novamente.', 'danger');
+
+                setTimeout(loadUserData, 5000);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function loadFormData() {
+            try {
+                const response = await fetch("/form/data");
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.hasForm && data.form) {
+                    formData = data.form;
+                    updateStatusUI(data.form.status, data.form);
+                } else {
+                    formData = null;
+                    updateStatusUI('none');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar formulário:', error);
+                formData = null;
+                updateStatusUI('none');
+            }
+        }
+
+        function updateStatusUI(status, form = null) {
+            elements.statusBadge.className = 'status-badge ';
+            
+            // Preencher campos com dados do formulário
+            if (form) {
+                elements.robloxName.textContent = form.roblox || 'Não informado';
+                elements.userAge.textContent = form.idade || 'Não informado';
+                elements.submitDate.textContent = form.created_at ? 
+                    new Date(form.created_at).toLocaleDateString('pt-BR') + ' ' + 
+                    new Date(form.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 
+                    '---';
+                elements.updateDate.textContent = form.updated_at ? 
+                    new Date(form.updated_at).toLocaleDateString('pt-BR') + ' ' + 
+                    new Date(form.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : 
+                    '---';
+                
+                // Preencher campos do formulário
+                if (elements.robloxInput) elements.robloxInput.value = form.roblox || '';
+                if (elements.idadeInput) elements.idadeInput.value = form.idade || '';
+                if (elements.experienciaInput) elements.experienciaInput.value = form.experiencia || '';
+                updateCharCount();
+            } else {
+                elements.robloxName.textContent = '---';
+                elements.userAge.textContent = '---';
+                elements.submitDate.textContent = '---';
+                elements.updateDate.textContent = '---';
+                
+                // Limpar campos
+                if (elements.robloxInput) elements.robloxInput.value = '';
+                if (elements.idadeInput) elements.idadeInput.value = '';
+                if (elements.experienciaInput) elements.experienciaInput.value = '';
+                updateCharCount();
+            }
+            
+            // Configurar baseado no status
+            switch(status) {
+                case 'pendente':
+                    elements.statusBadge.classList.add('status-pending');
+                    elements.statusBadge.innerHTML = '<i class="fas fa-clock"></i> PENDENTE';
+                    elements.submitBtn.disabled = true;
+                    elements.submitText.textContent = 'AGUARDANDO ANÁLISE';
+                    elements.submitBtn.innerHTML = '<i class="fas fa-clock"></i> AGUARDANDO ANÁLISE';
+                    elements.robloxInput.disabled = true;
+                    elements.idadeInput.disabled = true;
+                    elements.experienciaInput.disabled = true;
+                    showAlert('Seu formulário está em análise. Aguarde a resposta da equipe.', 'info');
+                    break;
+                    
+                case 'aprovado':
+                    elements.statusBadge.classList.add('status-approved');
+                    elements.statusBadge.innerHTML = '<i class="fas fa-check-circle"></i> APROVADO';
+                    elements.submitBtn.disabled = true;
+                    elements.submitText.textContent = 'WHITELIST CONCLUÍDA';
+                    elements.submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> WHITELIST CONCLUÍDA';
+                    elements.robloxInput.disabled = true;
+                    elements.idadeInput.disabled = true;
+                    elements.experienciaInput.disabled = true;
+                    showAlert('Parabéns! Sua whitelist foi aprovada. Você já pode acessar o servidor.', 'success', 15000);
+                    break;
+                    
+                case 'reprovado':
+                    elements.statusBadge.classList.add('status-rejected');
+                    elements.statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> REPROVADO';
+                    elements.submitBtn.disabled = false;
+                    elements.submitText.textContent = 'REENVIAR FORMULÁRIO';
+                    elements.submitBtn.innerHTML = '<i class="fas fa-redo"></i> REENVIAR FORMULÁRIO';
+                    elements.robloxInput.disabled = false;
+                    elements.idadeInput.disabled = false;
+                    elements.experienciaInput.disabled = false;
+                    
+                    // Mostrar motivo da reprovação
+                    if (form && form.motivo_reprova && form.motivo_reprova.trim()) {
+                        elements.rejectionReason.style.display = 'block';
+                        elements.rejectionText.textContent = form.motivo_reprova;
+                        showAlert('Seu formulário foi reprovado. Corrija os pontos indicados e envie novamente.', 'warning');
+                    } else {
+                        elements.rejectionReason.style.display = 'none';
+                        showAlert('Seu formulário foi reprovado. Você pode enviar um novo formulário.', 'warning');
+                    }
+                    break;
+                    
+                default:
+                    elements.statusBadge.classList.add('status-none');
+                    elements.statusBadge.innerHTML = '<i class="fas fa-edit"></i> NÃO ENVIADO';
+                    elements.submitBtn.disabled = false;
+                    elements.submitText.textContent = 'ENVIAR FORMULÁRIO';
+                    elements.submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ENVIAR FORMULÁRIO';
+                    elements.robloxInput.disabled = false;
+                    elements.idadeInput.disabled = false;
+                    elements.experienciaInput.disabled = false;
+                    elements.rejectionReason.style.display = 'none';
+                    break;
+            }
+        }
+
+        // Validar formulário
+        function validateForm() {
+            const roblox = elements.robloxInput.value.trim();
+            const idade = elements.idadeInput.value.trim();
+            const experiencia = elements.experienciaInput.value.trim();
+            
+            // Validações
+            if (!roblox || roblox.length < 3) {
+                showAlert('Nick do Roblox deve ter pelo menos 3 caracteres.', 'danger');
+                elements.robloxInput.focus();
+                return false;
+            }
+            
+            if (!idade || idade < 13 || idade > 99) {
+                showAlert('Idade deve ser entre 13 e 99 anos.', 'danger');
+                elements.idadeInput.focus();
+                return false;
+            }
+            
+            if (!experiencia || experiencia.length < 300) {
+                showAlert('A experiência deve ter no mínimo 300 caracteres.', 'danger');
+                elements.experienciaInput.focus();
+                return false;
+            }
+            
+            if (experiencia.length > 5000) {
+                showAlert('A experiência deve ter no máximo 5000 caracteres.', 'danger');
+                elements.experienciaInput.focus();
+                return false;
+            }
+            
+            return true;
+        }
+
+        // Enviar formulário
+        async function submitForm() {
+            if (isLoading) return;
+            
+            if (!validateForm()) {
+                return;
+            }
+            
+            const formData = {
+                roblox: elements.robloxInput.value.trim(),
+                idade: elements.idadeInput.value.trim(),
+                experiencia: elements.experienciaInput.value.trim()
+            };
+            
+            showLoading('Enviando formulário...');
+            
+            try {
+                const response = await fetch('/form', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showAlert(data.message || 'Formulário enviado com sucesso! Aguarde a análise.', 'success');
+                    
+                    // Recarregar dados
+                    setTimeout(() => {
+                        loadFormData();
+                    }, 2000);
+                    
+                } else {
+                    showAlert(data.error || 'Erro ao enviar formulário. Tente novamente.', 'danger');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao enviar formulário:', error);
+                showAlert('Erro de conexão. Verifique sua internet e tente novamente.', 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Logout
+        async function logout() {
+            if (isLoading) return;
+            
+            if (!confirm('Tem certeza que deseja sair?')) {
+                return;
+            }
+            
+            showLoading('Saindo...');
+            
+            try {
+                await fetch('/logout', { method: 'POST' });
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Erro ao fazer logout:', error);
+                showAlert('Erro ao sair. Tente novamente.', 'danger');
+                hideLoading();
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+
+            elements.experienciaInput.addEventListener('input', updateCharCount);
+            elements.experienciaInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.ctrlKey && !e.shiftKey) {
+                    e.preventDefault();
+                }
+            });
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key === 'Enter' && !isLoading) {
+                    submitForm();
+                }
+            });
+
+            setInterval(loadFormData, 30000);
+        });
+
+        window.submitForm = submitForm;
+        window.logout = logout;
+    </script>
+</body>
+</html>

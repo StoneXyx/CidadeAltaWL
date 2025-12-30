@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whitelist RP</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Rajdhani', sans-serif;
+    background: #050505;
+    color: white;
+    min-height: 100vh;
+}
+
+/* HEADER */
+header {
+    height: 70px;
+    background: #0b0b0b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    border-bottom: 1px solid #222;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+header h3 {
+    font-family: 'Montserrat', sans-serif;
+    letter-spacing: 2px;
+    color: #a855f7;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(168, 85, 247, 0.1);
+    padding: 8px 15px;
+    border-radius: 20px;
+}
+
+.user img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #a855f7;
+}
+
+.user span {
+    font-weight: 600;
+}
+
+/* FORMULÁRIO */
+.form-container {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.form-box {
+    background: #0e0e0e;
+    padding: 40px;
+    border-radius: 12px;
+    border: 1px solid #222;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.form-box h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #a855f7;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #ccc;
+}
+
+.form-control {
+    width: 100%;
+    padding: 15px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-family: 'Rajdhani', sans-serif;
+    transition: border 0.3s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #a855f7;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* STATUS MESSAGE */
+.status-message {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: none;
+}
+
+.status-message.success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid #22c55e;
+    color: #22c55e;
+    display: block;
+}
+
+.status-message.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    display: block;
+}
+
+/* BOTÃO */
+.btn-submit {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, #9333ea, #a855f7);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+    margin-top: 10px;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(168, 85, 247, 0.35);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+.btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* LOGOUT */
+.btn-logout {
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 8px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 15px;
+    transition: 0.3s;
+}
+
+.btn-logout:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h3>EVO GROUP WHITELIST</h3>
+    <div style="display: flex; align-items: center; gap: 15px;">
+        <div class="user">
+            <img id="avatar" src="https://cdn.discordapp.com/embed/avatars/0.png">
+            <span id="username">Carregando...</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sair</button>
+    </div>
+</header>
+
+<div class="form-container">
+    <div class="form-box">
+        <h2>📝 Formulário de Whitelist</h2>
+        
+        <div id="statusMessage" class="status-message"></div>
+        
+        <div class="form-group">
+            <label for="roblox">Nick do Roblox *</label>
+            <input type="text" id="roblox" class="form-control" placeholder="Digite seu nick do Roblox" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="idade">Idade *</label>
+            <input type="number" id="idade" class="form-control" placeholder="Digite sua idade" min="13" max="99" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="experiencia">Experiência em RP *</label>
+            <textarea id="experiencia" class="form-control" placeholder="Conte sobre sua experiência em servidores de RP (mínimo 100 caracteres)" required></textarea>
+            <small style="color: #888; display: block; margin-top: 5px;">Mínimo 100 caracteres</small>
+        </div>
+        
+        <button class="btn-submit" onclick="enviarFormulario()">ENVIAR FORMULÁRIO</button>
+    </div>
+    
+    <div style="text-align: center; margin-top: 30px; color: #666; font-size: 14px;">
+        <p>Após enviar, aguarde a análise da nossa equipe.</p>
+        <p>Você receberá uma mensagem no Discord quando houver uma resposta.</p>
+    </div>
+</div>
+
+<script>
+let currentUser = null;
+
+async function carregarUsuario() {
+    try {
+        const res = await fetch("/me");
+        if (res.status === 401 || res.status === 403) {
+            window.location.href = "/";
+            return;
+        }
+        
+        const user = await res.json();
+        if (!user) {
+            window.location.href = "/";
+            return;
+        }
+        
+        currentUser = user;
+        document.getElementById("username").innerText = user.username;
+        
+        if (user.id && user.avatar) {
+            document.getElementById("avatar").src = 
+                `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`;
+        }
+    } catch (error) {
+        console.error("Erro ao carregar usuário:", error);
+        window.location.href = "/";
+    }
+}
+
+function mostrarMensagem(texto, tipo = 'success') {
+    const msgDiv = document.getElementById("statusMessage");
+    msgDiv.textContent = texto;
+    msgDiv.className = `status-message ${tipo}`;
+    
+    if (tipo === 'success') {
+        setTimeout(() => {
+            msgDiv.style.display = 'none';
+        }, 5000);
+    }
+}
+
+async function enviarFormulario() {
+    const roblox = document.getElementById("roblox").value.trim();
+    const idade = document.getElementById("idade").value.trim();
+    const experiencia = document.getElementById("experiencia").value.trim();
+    
+    if (!roblox) {
+        mostrarMensagem("Por favor, digite seu nick do Roblox.", "error");
+        return;
+    }
+    
+    if (!idade || idade < 13) {
+        mostrarMensagem("Você precisa ter pelo menos 13 anos.", "error");
+        return;
+    }
+    
+    if (!experiencia || experiencia.length < 100) {
+        mostrarMensagem("Por favor, descreva sua experiência em RP com pelo menos 100 caracteres.", "error");
+        return;
+    }
+
+    const btn = document.querySelector('.btn-submit');
+    btn.disabled = true;
+    btn.textContent = "ENVIANDO...";
+    
+    try {
+        const response = await fetch("/form", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                roblox,
+                idade,
+                experiencia
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.ok) {
+            mostrarMensagem("✅ Formulário enviado com sucesso! Aguarde a análise.", "success");
+
+            document.getElementById("roblox").value = "";
+            document.getElementById("idade").value = "";
+            document.getElementById("experiencia").value = "";
+
+            setTimeout(() => {
+                mostrarMensagem("✅ Formulário enviado! Você pode fechar esta página.", "success");
+            }, 3000);
+        } else {
+            mostrarMensagem("❌ Erro ao enviar formulário. Tente novamente.", "error");
+        }
+    } catch (error) {
+        console.error("Erro:", error);
+        mostrarMensagem("❌ Erro de conexão. Verifique sua internet.", "error");
+    } finally {
+        btn.disabled = false;
+        btn.textContent = "ENVIAR FORMULÁRIO";
+    }
+}
+
+// Logout
+function logout() {
+    fetch("/logout", {
+        method: "POST"
+    }).then(() => {
+        window.location.href = "/";
+    }).catch(() => {
+        window.location.href = "/";
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    carregarUsuario();
+    
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                enviarFormulario();
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>
